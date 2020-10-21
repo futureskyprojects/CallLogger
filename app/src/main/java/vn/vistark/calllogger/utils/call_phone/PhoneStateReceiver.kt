@@ -1,99 +1,73 @@
 package vn.vistark.calllogger.utils.call_phone
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.CountDownTimer
+import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
 import es.dmoral.toasty.Toasty
+import vn.vistark.calllogger.models.CallLogModel
+import vn.vistark.calllogger.models.repositories.CallLogRepository
 import vn.vistark.calllogger.models.storages.AppStorage
+import vn.vistark.calllogger.views.call_log.CallLogActivity
 import java.lang.reflect.Method
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 // https://stackoverflow.com/questions/9684866/how-to-detect-when-phone-is-answered-or-rejected
 class PhoneStateReceiver : BroadcastReceiver() {
-    companion object {
-        const val NAME = "PhoneStateReceiver"
-        const val INCOMMING_CALL = "INCOMMING_CALL"
-        const val STOP_TEMPORARILY_DONE = "STOP_TEMPORARILY_DONE"
-
-        // Biến lưu trữ trạng thái trước đó
-        var previousState = "EXTRA_STATE_IDLE"
-
-        // Biến kiểm tra xem đây có phải lần đầu không
-        var isFirstTime = true
-    }
-
     // Khi nhận được trạng thái về cuộc gọi
+    @SuppressLint("UnsafeProtectedBroadcastReceiver")
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action.equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED)) {
-            when (intent.getStringExtra(TelephonyManager.EXTRA_STATE)) {
-                TelephonyManager.EXTRA_STATE_IDLE -> {
+        val telephony =
+            context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+        telephony.listen(object : PhoneStateListener() {
+            @SuppressLint("SimpleDateFormat")
+            override fun onCallStateChanged(state: Int, incomingNumber: String) {
+                super.onCallStateChanged(state, incomingNumber)
+                val calendar = Calendar.getInstance()
+                val dateFormat = SimpleDateFormat("hh:mm dd/MM/yyyy")
+                val dayName = "~~"
+                // Nếu cho phép chạy dịch vụ, tiến hành ngắt cuộc gọi và lưu
+                if (AppStorage.EnableService) {
+                    killCall(context)
+                    val callLog = CallLogModel(
+                        -1,
+                        incomingNumber,
+                        "${dateFormat.format(calendar.time)} ()"
+                    );
+                    CallLogRepository(context).add(callLog)
 
-                    // Nếu trạng thái trước đó là mình gọi, và bây giờ đã kết thúc
-                    if (previousState == "EXTRA_STATE_OFFHOOK") {
-                        // Gửi thông báo
-                        context.sendBroadcast(Intent(NAME))
-                    }
+                    CallLogActivity.leaking?.addCampaign(callLog)
+                }
+                println("incomingNumber : $incomingNumber")
+            }
+        }, PhoneStateListener.LISTEN_CALL_STATE)
+    }
+
+//    private fun KillCallTimer(context: Context) {
+//        // Thời gian chờ
+//        var timeDelay = AppStorage.DelayTimeCallInSeconds * 1000L + 380L
 //
-//                    // Nếu trạng thái trước đó là trạng thái dừng tạm thời do có cuộc gọi đến
-//                    if (previousState == "EXTRA_STATE_RINGING" || CampaignDetailActivity.isStopTemporarily) {
-//                        // Gửi thông báo để tái khởi động lại chiến dịch
-//                        context.sendBroadcast(Intent(STOP_TEMPORARILY_DONE))
-//                    }
-
-                    // Làm mới trạng thái hiện tại
-                    previousState = "EXTRA_STATE_IDLE"
-                }
-                TelephonyManager.EXTRA_STATE_RINGING -> {
-
-                    // Làm mới trạng thái hiện tại
-                    previousState = "EXTRA_STATE_RINGING"
-
-                    // Gửi thông báo có cuộc gọi đến
-                    context.sendBroadcast(Intent(INCOMMING_CALL))
-                }
-                TelephonyManager.EXTRA_STATE_OFFHOOK -> {
-
-                    // Nếu trước đó đang là trạng thái nghỉ
-                    if (previousState == "EXTRA_STATE_IDLE")
-                        KillCallTimer(context)
-
-                    // Làm mới trạng thái hiện tại
-                    previousState = "EXTRA_STATE_OFFHOOK"
-                }
-                else -> {
-
-                }
-            }
-        } else {
-            previousState = TelephonyManager.EXTRA_STATE_IDLE
-        }
-
-        println(">>>>> [$previousState]")
-
-    }
-
-    private fun KillCallTimer(context: Context) {
-        // Thời gian chờ
-        var timeDelay = AppStorage.DelayTimeCallInSeconds * 1000L + 380L
-
-        // Nếu không phải lần đầu, +1s
-        if (!isFirstTime) {
-            timeDelay += 1450
-            isFirstTime = false
-        }
-
-        println("READY KILL =>")
-        // Đếm ngược
-        object : CountDownTimer(timeDelay, 750) {
-            override fun onTick(millisUntilFinished: Long) {}
-            override fun onFinish() {
-                // Kết thúc cuộc gọi ngay lập tức
-                killCall(context)
-            }
-        }.start()
-    }
+//        // Nếu không phải lần đầu, +1s
+//        if (!isFirstTime) {
+//            timeDelay += 1450
+//            isFirstTime = false
+//        }
+//
+//        println("READY KILL =>")
+//        // Đếm ngược
+//        object : CountDownTimer(timeDelay, 750) {
+//            override fun onTick(millisUntilFinished: Long) {}
+//            override fun onFinish() {
+//                // Kết thúc cuộc gọi ngay lập tức
+//                killCall(context)
+//            }
+//        }.start()
+//    }
 
     private fun killCall(context: Context): Boolean {
         try {

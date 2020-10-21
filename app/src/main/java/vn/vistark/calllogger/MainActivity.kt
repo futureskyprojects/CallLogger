@@ -14,8 +14,6 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    //
-
     // Biến chứa thời gian khởi đầu tải
     var startLoadMilis = -1L;
 

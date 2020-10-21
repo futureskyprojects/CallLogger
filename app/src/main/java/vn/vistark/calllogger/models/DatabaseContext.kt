@@ -1,11 +1,12 @@
 package vn.vistark.calllogger.models
 
+import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.appcompat.app.AppCompatActivity
 
 
-class DatabaseContext(val context: AppCompatActivity) : SQLiteOpenHelper(
+class DatabaseContext(val context: Context) : SQLiteOpenHelper(
     context,
     DATABASE_NAME, null, 2009292
 ) {

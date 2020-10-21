@@ -7,6 +7,18 @@ class AppStorage {
     companion object {
         const val MAX_LOGIN_FAIL = 5
 
+        // Cho phép service khởi chạy hay không
+        var EnableService: Boolean
+            get() {
+                return SPUtils.sp?.getBoolean("EnableService", true)
+                    ?: true
+            }
+            set(enable) {
+                SPUtils.sp?.edit()?.apply {
+                    putBoolean("EnableService", enable)
+                }?.apply()
+            }
+
         // Mật khẩu mặc định để truy cập ứng dụng
         var AppPassword: String
             get() {

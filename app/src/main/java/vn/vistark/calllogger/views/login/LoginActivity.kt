@@ -1,6 +1,8 @@
 package vn.vistark.calllogger.views.login
 
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import es.dmoral.toasty.Toasty
@@ -8,6 +10,8 @@ import kotlinx.android.synthetic.main.activity_login.*
 import vn.vistark.calllogger.MainActivity
 import vn.vistark.calllogger.R
 import vn.vistark.calllogger.models.storages.AppStorage
+import vn.vistark.calllogger.services.BackgroundService
+import vn.vistark.calllogger.utils.ServiceUtils.Companion.isServiceRunning
 import vn.vistark.calllogger.views.call_log.CallLogActivity
 
 class LoginActivity : AppCompatActivity() {
@@ -92,6 +96,16 @@ class LoginActivity : AppCompatActivity() {
             Toasty.LENGTH_SHORT,
             true
         ).show()
+
+        // Nếu service chưa chạy, khởi động nó
+        if (AppStorage.EnableService && !this.isServiceRunning(BackgroundService::class.java)) {
+            val intent = Intent(this, BackgroundService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
+        }
 
         // Khi đăng nhập thành công, sang màn hình gọi
         gotoCallLogs()

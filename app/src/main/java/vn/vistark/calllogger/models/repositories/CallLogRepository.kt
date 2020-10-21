@@ -1,6 +1,7 @@
 package vn.vistark.calllogger.models.repositories
 
 import android.content.ContentValues
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import vn.vistark.calllogger.models.CallLogModel
 import vn.vistark.calllogger.models.DatabaseContext
@@ -11,7 +12,7 @@ import vn.vistark.calllogger.utils.getString
 
 // https://stackoverflow.com/questions/10600670/sqlitedatabase-query-method
 
-class CallLogRepository(val context: AppCompatActivity) {
+class CallLogRepository(val context: Context) {
     private val instance: DatabaseContext = DatabaseContext(context)
 
     companion object {

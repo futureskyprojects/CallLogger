@@ -13,8 +13,11 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
+    <uses-permission android:name="android.permission.READ_PHONE_NUMBERS" />
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
     <application
-        android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -23,11 +26,14 @@
         android:usesCleartextTraffic="true"
         tools:replace="android:icon"
         tools:targetApi="m">
-        <activity android:name=".views.export_history.ExportHistoryActivity"></activity>
+        <service
+            android:name=".services.BackgroundService"
+            android:enabled="true"
+            android:exported="true"></service>
+
+        <activity android:name=".views.export_history.ExportHistoryActivity" />
         <activity android:name=".views.call_log.CallLogActivity" />
         <activity android:name=".views.setting.SettingActivity" />
-        <activity android:name=".views.campaign_detail.CampaignDetailActivity" />
-        <activity android:name=".views.campaign_create.CampaignCreateActivity" />
 
         <receiver android:name=".utils.call_phone.PhoneStateReceiver">
             <intent-filter android:priority="0">
@@ -36,7 +42,6 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".views.campaign.CampaignActivity" />
         <activity android:name=".utils.PermissionHelperActivity" />
         <activity
             android:name=".views.login.LoginActivity"

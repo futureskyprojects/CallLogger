@@ -14,6 +14,6 @@ class CallLogViewHolder(val v: View) : RecyclerView.ViewHolder(v) {
 
     fun bind(callLogs: CallLogModel) {
         clnItemTvPhoneNumber.text = "Số điện thoại: ${callLogs.phoneNumber}"
-        clnItemTvPhoneNumber.text = "Nhận lúc: ${callLogs.receivedAt}"
+        clnItemTvTime.text = "Nhận lúc: ${callLogs.receivedAt}"
     }
 }

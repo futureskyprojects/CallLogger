@@ -20,11 +20,20 @@ class PermissionUtils {
             permissions.add(Manifest.permission.INTERNET)
             permissions.add(Manifest.permission.ACCESS_WIFI_STATE)
             permissions.add(Manifest.permission.ACCESS_NETWORK_STATE)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
-            }
             permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             permissions.add(Manifest.permission.VIBRATE)
+
+            permissions.add(Manifest.permission.READ_CONTACTS)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                permissions.add(Manifest.permission.READ_PHONE_NUMBERS)
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+                permissions.add(Manifest.permission.READ_CALL_LOG)
+            }
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 permissions.add(Manifest.permission.FOREGROUND_SERVICE)
             }

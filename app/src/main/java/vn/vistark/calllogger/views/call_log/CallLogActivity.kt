@@ -18,6 +18,9 @@ import vn.vistark.calllogger.views.export_history.ExportHistoryAdapter
 import vn.vistark.calllogger.views.setting.SettingActivity
 
 class CallLogActivity : AppCompatActivity() {
+    companion object {
+        var leaking: CallLogActivity? = null
+    }
 
     // Nơi chứa dữ liệu danh sách các số gọi đến
     val callLogs = ArrayList<CallLogModel>()
@@ -42,6 +45,8 @@ class CallLogActivity : AppCompatActivity() {
 
         // Tiến hành load dữ liệu
         CallLogLoader(this)
+
+        leaking = this
     }
 
     // Phương thức cập nhật, thêm mới lịch sử cuộc gọi vào danh sách
