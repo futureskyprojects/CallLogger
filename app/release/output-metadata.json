@@ -4,7 +4,7 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "vn.vistark.autocaller",
+  "applicationId": "vn.vistark.calllogger",
   "variantName": "release",
   "elements": [
     {
