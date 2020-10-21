@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import vn.vistark.calllogger.component.BlockNotifier
+import vn.vistark.calllogger.controller.app_license.AppLicenseLoader
 import vn.vistark.calllogger.models.app_license.AppLicense
 import vn.vistark.calllogger.models.storages.AppStorage
 import vn.vistark.calllogger.utils.*
@@ -52,11 +53,11 @@ class MainActivity : AppCompatActivity() {
         // cập nhật thời gian bắt đầu tải
         startLoadMilis = System.currentTimeMillis()
 
-        // Đối tượng appLicense
-        contiuosTask(AppLicense())
+        // Tiến hành cập nhật giấy phép
+        AppLicenseLoader(this)
     }
 
-    private fun contiuosTask(appLicense: AppLicense) {
+    fun contiguousTask(appLicense: AppLicense) {
         // Nếu không có quyền tiếp tục chạy
         if (!appLicense.appState.allowRun) {
             blockNotifier?.show(appLicense.appState.message)
