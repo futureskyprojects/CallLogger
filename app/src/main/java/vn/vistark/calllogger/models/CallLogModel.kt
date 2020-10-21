@@ -1,7 +1,5 @@
 package vn.vistark.calllogger.models
 
-import java.sql.Date
-
 class CallLogModel(
     // Mã, khóa chính
     var id: Int = 0,
@@ -12,5 +10,10 @@ class CallLogModel(
     // Gọi đến lúc
     var receivedAt: String
 ) {
-
+    companion object {
+        const val TABLE_NAME = "call_log"
+        const val ID = "id"
+        const val PHONE_NUMBER = "phone_number"
+        const val RECEIVED_AT = "received_at"
+    }
 }

@@ -1,11 +1,11 @@
-package vn.vistark.calllogger.controller.campaign
+package vn.vistark.calllogger.controller.call_log
 
 import androidx.loader.content.AsyncTaskLoader
-import vn.vistark.calllogger.models.repositories.CampaignRepository
-import vn.vistark.calllogger.views.campaign.CampaignActivity
+import vn.vistark.calllogger.models.repositories.CallLogRepository
+import vn.vistark.calllogger.views.call_log.CallLogActivity
 
-class CampaignATL(val context: CampaignActivity) : AsyncTaskLoader<Boolean>(context) {
-    private val campaignRepository = CampaignRepository(context)
+class CallLogATL(val context: CallLogActivity) : AsyncTaskLoader<Boolean>(context) {
+    private val callLogRepository = CallLogRepository(context)
 
     init {
         onContentChanged()
@@ -22,19 +22,19 @@ class CampaignATL(val context: CampaignActivity) : AsyncTaskLoader<Boolean>(cont
     }
 
     override fun loadInBackground(): Boolean? {
-        var lastCampaignId = 0
+        var lastCallLogId = 0
         while (true) {
             // Lấy x phần tử đầu tiên
-            val campaigns = campaignRepository.getLimit(lastCampaignId, 5)
+            val callLogs = callLogRepository.getLimit(lastCallLogId, 10)
             // Nếu không có thì ngưng
-            if (campaigns.isEmpty())
+            if (callLogs.isEmpty())
                 break
 
             // Có thì lấy ID của phần tử cuối cùng
-            lastCampaignId = campaigns.last().id
+            lastCallLogId = callLogs.last().id
 
             // Lặp và thêm vào ds hiển tị
-            campaigns.forEach { campaign ->
+            callLogs.forEach { campaign ->
                 context.addCampaign(campaign)
             }
         }

@@ -2,14 +2,19 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/trMenuAddCampaign"
-        android:icon="@drawable/add_contact_white"
+        android:id="@+id/trMenuExportPhoneNumbers"
+        android:icon="@drawable/ic_export"
         android:orderInCategory="0"
         android:title="Tạo chiến dịch mới"
         app:showAsAction="always" />
     <item
-        android:id="@+id/trMenuSetting"
+        android:id="@+id/trMenuExportHistory"
         android:icon="@drawable/settings"
         android:orderInCategory="0"
+        android:title="Lịch sử xuất" />
+    <item
+        android:id="@+id/trMenuSetting"
+        android:icon="@drawable/settings"
+        android:orderInCategory="1"
         android:title="Thiết lập" />
 </menu>

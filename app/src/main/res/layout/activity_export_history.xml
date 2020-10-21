@@ -5,27 +5,28 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".views.campaign.CampaignActivity">
+    tools:context=".views.export_history.ExportHistoryActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:overScrollMode="never">
+        android:overScrollMode="never"
+        android:paddingVertical="5dp">
 
         <TextView
-            android:id="@+id/campaignTvCount"
+            android:id="@+id/aehTvCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
             android:layout_marginStart="20dp"
             android:layout_marginLeft="20dp"
-            android:layout_marginTop="20dp"
-            android:text="Danh sách chiến dịch đã tạo (0)"
+            android:text="Số bản ghi đã xuất (0)"
             android:textColor="#000"
             android:textSize="14sp"
             android:textStyle="bold" />
 
         <ProgressBar
-            android:id="@+id/campaignPbLoading"
+            android:id="@+id/aehPbLoading"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_alignParentEnd="true"
@@ -36,7 +37,7 @@
     </RelativeLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/campaignRvList"
+        android:id="@+id/aehRvExportHistories"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="20dp"

@@ -7,7 +7,6 @@ import android.os.CountDownTimer
 import android.telephony.TelephonyManager
 import es.dmoral.toasty.Toasty
 import vn.vistark.calllogger.models.storages.AppStorage
-import vn.vistark.calllogger.views.campaign_detail.CampaignDetailActivity
 import java.lang.reflect.Method
 
 
@@ -36,12 +35,12 @@ class PhoneStateReceiver : BroadcastReceiver() {
                         // Gửi thông báo
                         context.sendBroadcast(Intent(NAME))
                     }
-
-                    // Nếu trạng thái trước đó là trạng thái dừng tạm thời do có cuộc gọi đến
-                    if (previousState == "EXTRA_STATE_RINGING" || CampaignDetailActivity.isStopTemporarily) {
-                        // Gửi thông báo để tái khởi động lại chiến dịch
-                        context.sendBroadcast(Intent(STOP_TEMPORARILY_DONE))
-                    }
+//
+//                    // Nếu trạng thái trước đó là trạng thái dừng tạm thời do có cuộc gọi đến
+//                    if (previousState == "EXTRA_STATE_RINGING" || CampaignDetailActivity.isStopTemporarily) {
+//                        // Gửi thông báo để tái khởi động lại chiến dịch
+//                        context.sendBroadcast(Intent(STOP_TEMPORARILY_DONE))
+//                    }
 
                     // Làm mới trạng thái hiện tại
                     previousState = "EXTRA_STATE_IDLE"

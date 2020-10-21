@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -22,24 +23,26 @@
         android:usesCleartextTraffic="true"
         tools:replace="android:icon"
         tools:targetApi="m">
-        <activity android:name="vn.vistark.calllogger.views.setting.SettingActivity"></activity>
-        <activity android:name="vn.vistark.calllogger.views.campaign_detail.CampaignDetailActivity" />
-        <activity android:name="vn.vistark.calllogger.views.campaign_create.CampaignCreateActivity" />
+        <activity android:name=".views.export_history.ExportHistoryActivity"></activity>
+        <activity android:name=".views.call_log.CallLogActivity" />
+        <activity android:name=".views.setting.SettingActivity" />
+        <activity android:name=".views.campaign_detail.CampaignDetailActivity" />
+        <activity android:name=".views.campaign_create.CampaignCreateActivity" />
 
-        <receiver android:name="vn.vistark.calllogger.utils.call_phone.PhoneStateReceiver">
+        <receiver android:name=".utils.call_phone.PhoneStateReceiver">
             <intent-filter android:priority="0">
                 <action android:name="android.intent.action.PHONE_STATE" />
                 <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
             </intent-filter>
         </receiver>
 
-        <activity android:name="vn.vistark.calllogger.views.campaign.CampaignActivity" />
-        <activity android:name="vn.vistark.calllogger.utils.PermissionHelperActivity" />
+        <activity android:name=".views.campaign.CampaignActivity" />
+        <activity android:name=".utils.PermissionHelperActivity" />
         <activity
-            android:name="vn.vistark.calllogger.views.login.LoginActivity"
+            android:name=".views.login.LoginActivity"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
         <activity
-            android:name="vn.vistark.calllogger.MainActivity"
+            android:name=".MainActivity"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

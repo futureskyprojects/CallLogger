@@ -1,11 +1,11 @@
-package vn.vistark.calllogger.controller.campaign
+package vn.vistark.calllogger.controller.export_history
 
 import android.os.Bundle
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.Loader
-import vn.vistark.calllogger.views.campaign.CampaignActivity
+import vn.vistark.calllogger.views.export_history.ExportHistoryActivity
 
-class CampaignLoader(val context: CampaignActivity) : LoaderManager.LoaderCallbacks<Boolean> {
+class ExportHistoryLoader(val context: ExportHistoryActivity) : LoaderManager.LoaderCallbacks<Boolean> {
     var loaderManager: LoaderManager = LoaderManager.getInstance(context)
 
     init {
@@ -13,7 +13,7 @@ class CampaignLoader(val context: CampaignActivity) : LoaderManager.LoaderCallba
     }
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Boolean> {
-        return CampaignATL(context)
+        return ExportHistoryATL(context)
     }
 
     override fun onLoadFinished(loader: Loader<Boolean>, data: Boolean?) {

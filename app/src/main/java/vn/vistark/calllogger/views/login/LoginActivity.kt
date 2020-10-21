@@ -8,7 +8,7 @@ import kotlinx.android.synthetic.main.activity_login.*
 import vn.vistark.calllogger.MainActivity
 import vn.vistark.calllogger.R
 import vn.vistark.calllogger.models.storages.AppStorage
-import vn.vistark.calllogger.views.campaign.CampaignActivity
+import vn.vistark.calllogger.views.call_log.CallLogActivity
 
 class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,7 +20,7 @@ class LoginActivity : AppCompatActivity() {
             // Thông báo đăng nhập thành công
             Toasty.success(this, "Tự động đăng nhập thành công", Toasty.LENGTH_SHORT, true).show()
             // Đến trang gọi
-            gotoCampaign()
+            gotoCallLogs()
         }
 
         // Nếu người dùng có mật khẩu mà nó lại khác với mật khẩu ứng dụng
@@ -94,11 +94,11 @@ class LoginActivity : AppCompatActivity() {
         ).show()
 
         // Khi đăng nhập thành công, sang màn hình gọi
-        gotoCampaign()
+        gotoCallLogs()
     }
 
-    private fun gotoCampaign() {
-        val intent = Intent(this, CampaignActivity::class.java)
+    private fun gotoCallLogs() {
+        val intent = Intent(this, CallLogActivity::class.java)
         startActivity(intent)
         finish()
     }
