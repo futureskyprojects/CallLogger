@@ -10,8 +10,8 @@ class AppStorage {
         // Mật khẩu mặc định để truy cập ứng dụng
         var AppPassword: String
             get() {
-                return SPUtils.sp?.getString("AppPassword", AppLicense().AppPassword)
-                    ?: AppLicense().AppPassword
+                return SPUtils.sp?.getString("AppPassword", AppLicense().appPassword)
+                    ?: AppLicense().appPassword
             }
             set(appPassword) {
                 SPUtils.sp?.edit()?.apply {

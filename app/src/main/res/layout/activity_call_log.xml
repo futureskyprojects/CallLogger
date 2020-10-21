@@ -16,6 +16,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:overScrollMode="never"
             android:paddingVertical="5dp">
 
@@ -62,25 +63,34 @@
     <RelativeLayout
         android:id="@+id/aclRlSearchGroup"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="?android:attr/actionBarSize"
         android:layout_alignParentBottom="true">
 
         <EditText
             android:id="@+id/aclEdtPhoneNumber"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_toStartOf="@id/aclBtnSearch"
             android:layout_toLeftOf="@id/aclBtnSearch"
+            android:background="@drawable/edittext_default"
             android:hint="Nhập số điện thoại cần tìm"
-            android:inputType="phone" />
+            android:inputType="phone"
+            android:padding="10dp" />
 
-        <Button
+        <ImageView
             android:id="@+id/aclBtnSearch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="?android:attr/actionBarSize"
+            android:layout_height="?android:attr/actionBarSize"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:text="Tìm kiếm" />
+            android:background="@drawable/btn_default"
+            android:clickable="true"
+            android:drawablePadding="5dp"
+            android:focusable="true"
+            android:padding="10dp"
+            android:paddingHorizontal="10dp"
+            android:src="@drawable/ic_search"
+            android:textColor="#FFF" />
     </RelativeLayout>
 
 </RelativeLayout>

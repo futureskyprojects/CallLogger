@@ -58,13 +58,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun contiuosTask(appLicense: AppLicense) {
         // Nếu không có quyền tiếp tục chạy
-        if (!appLicense.AppState.AllowRun) {
-            blockNotifier?.show(appLicense.AppState.Message)
+        if (!appLicense.appState.allowRun) {
+            blockNotifier?.show(appLicense.appState.message)
             return
         }
 
         // Cập nhật mật khẩu cho ứng dụng
-        AppStorage.AppPassword = appLicense.AppPassword
+        AppStorage.AppPassword = appLicense.appPassword
 //        Toast.makeText(this, "Mật khẩu ứng dụng là: ${appLicense.AppPassword}", Toast.LENGTH_SHORT)
 //            .show()
 
