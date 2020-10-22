@@ -52,7 +52,9 @@ class MainActivity : AppCompatActivity() {
         startLoadMilis = System.currentTimeMillis()
 
         // Tiến hành cập nhật giấy phép
-        AppLicenseLoader(this)
+//        AppLicenseLoader(this)
+
+        contiguousTask(AppLicense())
     }
 
     fun contiguousTask(appLicense: AppLicense) {
