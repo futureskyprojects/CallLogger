@@ -2,13 +2,13 @@ package vn.vistark.calllogger.models.repositories
 
 import android.content.ContentValues
 import android.content.Context
-import androidx.appcompat.app.AppCompatActivity
+import android.database.DatabaseUtils
+import android.database.sqlite.SQLiteDatabase
 import vn.vistark.calllogger.models.CallLogModel
 import vn.vistark.calllogger.models.DatabaseContext
-import vn.vistark.calllogger.models.PhoneCallState
-import vn.vistark.calllogger.utils.getBoolean
 import vn.vistark.calllogger.utils.getInt
 import vn.vistark.calllogger.utils.getString
+
 
 // https://stackoverflow.com/questions/10600670/sqlitedatabase-query-method
 
@@ -63,6 +63,67 @@ class CallLogRepository(val context: Context) {
             null,
             "${CallLogModel.ID} ASC",
             limit.toString()
+        )
+        // Nếu không có bản ghi
+        if (!cursor.moveToFirst()) {
+            instance.readableDatabase.close()
+            cursor.close()
+            return callLogs.toTypedArray()
+        }
+
+        // Còn có thì tiến hành duyệt
+        do {
+            try {
+                // Gán dữ liệu vào đối tượng
+                val callLog = CallLogModel(
+                    cursor.getInt(CallLogModel.ID),
+                    cursor.getString(CallLogModel.PHONE_NUMBER),
+                    cursor.getString(CallLogModel.RECEIVED_AT)
+                )
+
+                // Lưu vào danh sách lưu trữ
+                callLogs.add(callLog)
+            } catch (e: Exception) {
+                // Sự đời khó lường trước
+                e.printStackTrace()
+            }
+
+        } while (cursor.moveToNext())
+
+        // Đóng con trỏ
+        cursor.close()
+
+        // Đóng trình đọc
+        instance.readableDatabase.close()
+
+        // Trả về dữ liệu
+        return callLogs.toTypedArray()
+    }
+
+    fun getCount(): Int {
+        val count =
+            DatabaseUtils.queryNumEntries(instance.readableDatabase, CallLogModel.TABLE_NAME)
+        instance.readableDatabase.close()
+        return count.toInt()
+    }
+
+    fun remove(callLogId: Int):Boolean {
+        val res = instance.writableDatabase.delete(
+            CallLogModel.TABLE_NAME,
+            "${CallLogModel.ID} = ?",
+            arrayOf(callLogId.toString())
+        )
+        instance.writableDatabase.close()
+        return res > 0
+    }
+
+    fun getAll(): Array<CallLogModel> {
+        // Khai báo biến chứa danh sách
+        val callLogs = ArrayList<CallLogModel>()
+        // Lấy con trỏ
+        val cursor = instance.readableDatabase.rawQuery(
+            "SELECT * FROM ${CallLogModel.TABLE_NAME}",
+            null
         )
         // Nếu không có bản ghi
         if (!cursor.moveToFirst()) {

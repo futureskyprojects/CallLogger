@@ -1,7 +1,9 @@
 package vn.vistark.calllogger.models.repositories
 
 import android.content.ContentValues
+import android.database.DatabaseUtils
 import androidx.appcompat.app.AppCompatActivity
+import vn.vistark.calllogger.models.CallLogModel
 import vn.vistark.calllogger.models.DatabaseContext
 import vn.vistark.calllogger.models.ExportHistoryModel
 import vn.vistark.calllogger.utils.getInt
@@ -20,7 +22,8 @@ class ExportHistoryRepository(val context: AppCompatActivity) {
         contentValues.put(ExportHistoryModel.EXPORT_AT, campaignModel.exportedAt)
 
         // Ghi vào db
-        val res = instance.writableDatabase.insert(ExportHistoryModel.TABLE_NAME, null, contentValues)
+        val res =
+            instance.writableDatabase.insert(ExportHistoryModel.TABLE_NAME, null, contentValues)
 
         // Đóng CSDL lại
         instance.writableDatabase.close()
@@ -29,26 +32,21 @@ class ExportHistoryRepository(val context: AppCompatActivity) {
         return res
     }
 
-    fun getMaxId(): Long {
-        val cursor = instance.readableDatabase.rawQuery(
-            "SELECT MAX(${ExportHistoryModel.ID}) as ${ExportHistoryModel.ID} FROM ${ExportHistoryModel.TABLE_NAME}",
-            null
+    fun remove(exhId: Int): Boolean {
+        val res = instance.writableDatabase.delete(
+            ExportHistoryModel.TABLE_NAME,
+            "${ExportHistoryModel.ID} = ?",
+            arrayOf(exhId.toString())
         )
+        instance.writableDatabase.close()
+        return res > 0
+    }
 
-        // Nếu không có, trả về 0
-        if (!cursor.moveToFirst()) {
-            cursor.close()
-            instance.readableDatabase.close()
-            return 0
-        }
-
-        // Hoặc trả về MAX ID
-        val res = cursor.getInt(0)
-
-        cursor.close()
+    fun getCount(): Int {
+        val count =
+            DatabaseUtils.queryNumEntries(instance.readableDatabase, ExportHistoryModel.TABLE_NAME)
         instance.readableDatabase.close()
-
-        return res.toLong()
+        return count.toInt()
     }
 
     fun getLimit(lastExportHistoryId: Int, limit: Long): Array<ExportHistoryModel> {
@@ -67,6 +65,54 @@ class ExportHistoryRepository(val context: AppCompatActivity) {
             null,
             "${ExportHistoryModel.ID} ASC",
             limit.toString()
+        )
+
+        // Nếu không có bản ghi
+        if (!cursor.moveToFirst()) {
+            cursor.close()
+            instance.readableDatabase.close()
+            return campaigns.toTypedArray()
+        }
+
+        // Còn có thì tiến hành duyệt
+        do {
+            try {
+                // Gán dữ liệu vào đối tượng
+                val campaign = ExportHistoryModel(
+                    cursor.getInt(ExportHistoryModel.ID),
+                    cursor.getString(ExportHistoryModel.EXPORT_CONTENT),
+                    cursor.getInt(ExportHistoryModel.PHONE_NUMBER_COUNT),
+                    cursor.getInt(ExportHistoryModel.PHONE_NUMBER_TOTAL),
+                    cursor.getString(ExportHistoryModel.EXPORT_AT)
+                )
+                // Theeo vào danh sách lưu trữ
+                campaigns.add(campaign)
+            } catch (e: Exception) {
+                // Sự đời khó lường trước
+                e.printStackTrace()
+            }
+
+        } while (cursor.moveToNext())
+
+        // Đóng con trỏ
+        cursor.close()
+
+        // Đóng trình đọc
+        instance.readableDatabase.close()
+
+        // Trả về dữ liệu
+        return campaigns.toTypedArray()
+    }
+
+    fun getAll(): Array<ExportHistoryModel> {
+
+        // Khai báo biến chứa danh sách
+        val campaigns = ArrayList<ExportHistoryModel>()
+
+        // Lấy con trỏ
+        val cursor = instance.readableDatabase.rawQuery(
+            "SELECT * FROM ${ExportHistoryModel.TABLE_NAME}",
+            null
         )
 
         // Nếu không có bản ghi

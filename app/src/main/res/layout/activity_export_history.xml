@@ -49,7 +49,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:gravity="center"
-        android:text="Hiện tại chưa có chiến dịch nào được tạo"
+        android:text="Hiện tại chưa xuất bất cứ file nào"
         android:textSize="16sp"
         android:textStyle="italic" />
 </LinearLayout>

@@ -4,10 +4,14 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import vn.vistark.calllogger.R
+import vn.vistark.calllogger.models.CallLogModel
 import vn.vistark.calllogger.models.ExportHistoryModel
 
 class ExportHistoryAdapter(private val exportHistoryModels: ArrayList<ExportHistoryModel>) :
     RecyclerView.Adapter<ExportHistoryViewHolder>() {
+
+    var onLongClick: ((ExportHistoryModel) -> Unit)? = null
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExportHistoryViewHolder {
         val v = LayoutInflater.from(parent.context)
             .inflate(R.layout._export_history_item, parent, false)
@@ -21,5 +25,9 @@ class ExportHistoryAdapter(private val exportHistoryModels: ArrayList<ExportHist
     override fun onBindViewHolder(holder: ExportHistoryViewHolder, position: Int) {
         val exportHistory = exportHistoryModels[position]
         holder.bind(exportHistory)
+        holder.ehtItemLnRoot.setOnLongClickListener {
+            onLongClick?.invoke(exportHistory)
+            return@setOnLongClickListener true
+        }
     }
 }

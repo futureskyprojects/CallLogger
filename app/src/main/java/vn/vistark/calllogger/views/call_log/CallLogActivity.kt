@@ -13,15 +13,22 @@ import cn.pedant.SweetAlert.SweetAlertDialog
 import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.activity_call_log.*
 import vn.vistark.calllogger.R
+import vn.vistark.calllogger.controller.export.ExportLoader
 import vn.vistark.calllogger.models.CallLogModel
 import vn.vistark.calllogger.models.repositories.CallLogRepository
 import vn.vistark.calllogger.views.export_history.ExportHistoryActivity
 import vn.vistark.calllogger.views.setting.SettingActivity
+import kotlin.random.Random
 
 class CallLogActivity : AppCompatActivity() {
     lateinit var callLogRepository: CallLogRepository
     var lastCallLogIndex = 0
     var numberForSearch = ""
+
+    // Khu vực chứa các biến số dành cho xuất tệp
+    var loading: SweetAlertDialog? = null
+    var total = 0
+    var current = 0
 
     companion object {
         var leaking: CallLogActivity? = null
@@ -39,6 +46,8 @@ class CallLogActivity : AppCompatActivity() {
 
         callLogRepository = CallLogRepository(this)
 
+//        initRandom(200)
+
         // Thiết lập tiêu đề
         supportActionBar?.title = "Lịch sử gọi đến"
 
@@ -49,6 +58,43 @@ class CallLogActivity : AppCompatActivity() {
         aclRvCallLogs.layoutManager = LinearLayoutManager(this)
         aclRvCallLogs.setHasFixedSize(true)
         aclRvCallLogs.adapter = adapter
+
+        // Sự kiện nhấn giữ xóa
+        adapter.onLongClick = { cl ->
+            SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                .setTitleText("Bạn thực sự muốn xóa số điện thoại ${cl.phoneNumber}?")
+                .setContentText("XÓA SỐ")
+                .setConfirmButton("Xóa") {
+                    it.dismissWithAnimation()
+                    it.cancel()
+                    if (callLogRepository.remove(cl.id)) {
+                        SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
+                            .setTitleText("Đã xóa thành công")
+                            .setContentText("XÓA SỐ")
+                            .showCancelButton(false)
+                            .setConfirmButton("Đóng") {
+                                it.dismissWithAnimation()
+                                it.cancel()
+                            }.show()
+                        callLogs.remove(cl)
+                        adapter.notifyDataSetChanged()
+                        updateCount()
+                    } else {
+                        SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
+                            .setTitleText("Xóa không thành công")
+                            .setContentText("XÓA SỐ")
+                            .showCancelButton(false)
+                            .setConfirmButton("Đóng") {
+                                it.dismissWithAnimation()
+                                it.cancel()
+                            }.show()
+                    }
+                }
+                .setCancelButton("Không") {
+                    it.dismissWithAnimation()
+                    it.cancel()
+                }.show()
+        }
 
         // Gọi sự kiện khi kéo đến gần cuối danh sách
         initLoadMoreEvents()
@@ -65,16 +111,21 @@ class CallLogActivity : AppCompatActivity() {
             updateCount()
             loadMore()
         }
+
     }
+
+
 
     // Phương thức cập nhật, thêm mới lịch sử cuộc gọi vào danh sách
     fun addCallLog(callLog: CallLogModel) {
-        callLogs.add(callLog)
-        runOnUiThread {
-            if (aclRvCallLogs.visibility != View.VISIBLE)
-                aclRvCallLogs.visibility = View.VISIBLE
-            adapter.notifyDataSetChanged()
-            updateCount()
+        if (callLogs.isEmpty() || !callLogs.any { x -> x.phoneNumber == callLog.phoneNumber }) {
+            callLogs.add(callLog)
+            runOnUiThread {
+                if (aclRvCallLogs.visibility != View.VISIBLE)
+                    aclRvCallLogs.visibility = View.VISIBLE
+                adapter.notifyDataSetChanged()
+                updateCount()
+            }
         }
     }
 
@@ -110,7 +161,7 @@ class CallLogActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     fun updateCount() {
-        aclTvCount.text = "Danh sách số gọi đến (${callLogs.size})"
+        aclTvCount.text = "Danh sách số gọi đến (${callLogRepository.getCount()})"
     }
 
 
@@ -123,8 +174,19 @@ class CallLogActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.trMenuExportPhoneNumbers -> {
-                Toasty.success(this, "Xuất danh sách số điện thoại", Toasty.LENGTH_SHORT, true)
-                    .show()
+                SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                    .setTitleText("Bạn muốn xuất tất cả các số trong lược sử gọi đến thành tệp *.txt?")
+                    .setContentText("XUẤT TỆP")
+                    .setConfirmButton("Xuất ngay") {
+                        it.dismissWithAnimation()
+                        it.cancel()
+                        // Hàm xuất
+                        exportToFile()
+                    }
+                    .setCancelButton("Tạm đóng") {
+                        it.dismissWithAnimation()
+                        it.cancel()
+                    }.show()
                 return true
             }
             R.id.trMenuExportHistory -> {
@@ -141,7 +203,6 @@ class CallLogActivity : AppCompatActivity() {
         }
         return false
     }
-
 
     // Khởi động màn hình thiết lập
     private fun settingApp(): Boolean {
@@ -182,4 +243,34 @@ class CallLogActivity : AppCompatActivity() {
 //
 //        }
     }
+
+    // ========================================================= //
+    // =============== START EXPORT TO FILE ==================== //
+    // ========================================================= //
+    fun hideLoadingDialog() {
+        if (loading != null) {
+            loading?.dismiss()
+            loading?.cancel()
+            loading = null
+        }
+    }
+
+    fun showLoadingDialog() {
+        hideLoadingDialog()
+        loading = SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE)
+            .setTitleText("Vui lòng không tắt/chuyển màn hình")
+            .setContentText("ĐANG XỬ LÝ")
+            .showCancelButton(false)
+        loading?.setCancelable(false)
+        loading?.show()
+    }
+
+    private fun exportToFile() {
+        var total = 0
+        var current = 0
+        ExportLoader(this)
+    }
+    // ========================================================= //
+    // =============== END EXPORT TO FILE ====================== //
+    // ========================================================= //
 }

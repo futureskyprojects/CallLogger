@@ -9,18 +9,22 @@ import vn.vistark.calllogger.R
 import vn.vistark.calllogger.models.ExportHistoryModel
 
 class ExportHistoryViewHolder(val v: View) : RecyclerView.ViewHolder(v) {
-    private val ehtItemLnRoot: LinearLayout = v.findViewById(R.id.ehtItemLnRoot)
+    val ehtItemLnRoot: LinearLayout = v.findViewById(R.id.ehtItemLnRoot)
     private val ehtItemTvExportTime: TextView = v.findViewById(R.id.ehtItemTvExportTime)
     private val ehtItemCount: TextView = v.findViewById(R.id.ehtItemCount)
     private val ehtItemPbProgress: ProgressBar = v.findViewById(R.id.ehtItemPbProgress)
     private val ehtItemTvPercent: TextView = v.findViewById(R.id.ehtItemTvPercent)
+    private val ehtItemTvPath: TextView = v.findViewById(R.id.ehtItemTvPath)
 
     fun bind(exportHistoryModel: ExportHistoryModel) {
         ehtItemTvExportTime.text = exportHistoryModel.exportedAt
-        ehtItemCount.text = "(${exportHistoryModel.phoneNumberCount}/${exportHistoryModel.phoneNumberTotal})"
+        ehtItemCount.text =
+            "(${exportHistoryModel.phoneNumberCount}/${exportHistoryModel.phoneNumberTotal})"
         val progress: Int =
             ((exportHistoryModel.phoneNumberCount.toDouble() / exportHistoryModel.phoneNumberTotal.toDouble()) * 100).toInt()
         ehtItemPbProgress.progress = progress
         ehtItemTvPercent.text = "$progress%"
+        ehtItemTvPath.text = exportHistoryModel.exportContent
+        ehtItemTvPath.isSelected = true
     }
 }

@@ -1,7 +1,6 @@
 package vn.vistark.calllogger.views.setting
 
 import android.content.Intent
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -9,9 +8,16 @@ import cn.pedant.SweetAlert.SweetAlertDialog
 import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.activity_setting.*
 import vn.vistark.calllogger.R
+import vn.vistark.calllogger.models.CallLogModel
+import vn.vistark.calllogger.models.repositories.CallLogRepository
+import vn.vistark.calllogger.models.repositories.ExportHistoryRepository
 import vn.vistark.calllogger.models.storages.AppStorage
 import vn.vistark.calllogger.services.BackgroundService
 import vn.vistark.calllogger.utils.ServiceUtils.Companion.isServiceRunning
+import vn.vistark.calllogger.views.MainActivity
+import vn.vistark.calllogger.views.call_log.CallLogActivity
+import java.io.File
+import kotlin.random.Random
 
 class SettingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,7 +55,96 @@ class SettingActivity : AppCompatActivity() {
         settingSwcEndCall.setOnClickListener {
             AppStorage.EnableEndCall = settingSwcEndCall.isChecked
         }
+
+        settingBtnRemoveAllCallLog.setOnClickListener {
+            val count = CallLogRepository(this).getCount()
+            SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                .setTitleText("Xóa tất cả $count SĐT trong danh sách gọi đến? Việc này không thể hoàn tác")
+                .setContentText("XÓA HẾT")
+                .setCancelButton("Đóng") {
+                    it.dismissWithAnimation()
+                    it.cancel()
+                }
+                .setConfirmButton("Xóa") { z ->
+                    z.dismissWithAnimation()
+                    z.cancel()
+                    if (CallLogRepository(this).removeAll() > 0) {
+                        SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
+                            .setTitleText("Đã xóa hoàn tất $count SĐT")
+                            .setContentText("HOÀN TẤT")
+                            .showCancelButton(false)
+                            .setConfirmButton("Đóng") {
+                                it.dismissWithAnimation()
+                                it.cancel()
+                            }.show()
+                        CallLogActivity.leaking?.callLogs?.clear()
+                        CallLogActivity.leaking?.adapter?.notifyDataSetChanged()
+                        CallLogActivity.leaking?.updateCount()
+                    }
+                }.show()
+        }
+
+        settingBtnRemoveAllExportHistory.setOnClickListener {
+            val exportHistories = ExportHistoryRepository(this).getAll()
+            val count = exportHistories.size
+            SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                .setTitleText("Xóa tất cả $count bản xuất? Việc này không thể hoàn tác")
+                .setContentText("XÓA HẾT")
+                .setCancelButton("Đóng") {
+                    it.dismissWithAnimation()
+                    it.cancel()
+                }
+                .setConfirmButton("Xóa") {
+                    it.dismissWithAnimation()
+                    it.cancel()
+                    for (exportHistory in exportHistories) {
+                        val f = File(exportHistory.exportContent)
+
+                        if (f.exists())
+                            f.delete()
+                    }
+                    SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
+                        .setTitleText("Đã xóa hoàn tất $count bản xuất")
+                        .setContentText("HOÀN TẤT")
+                        .showCancelButton(false)
+                        .setConfirmButton("Đóng") {
+                            it.dismissWithAnimation()
+                            it.cancel()
+                        }.show()
+                }.show()
+        }
+
+        settingBtnCreateSample.setOnClickListener {
+            SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                .setTitleText("Thêm dữ liệu mẫu khi có dữ liệu thật sẽ gây nhiễu loạn và có khả năng dẫn đến sai sót trong danh sách số điện thoại của bạn. Chức năng này chỉ nên được dùng để kiểm tra phần mềm!")
+                .setContentText("THÊM 300 MẪU")
+                .setCancelButton("Đóng") {
+                    it.dismissWithAnimation()
+                    it.cancel()
+                }
+                .setConfirmButton("Vẫn thêm") {
+                    for (i in 0 until 300) {
+                        val phone = Random.nextInt(100000000, 999999999)
+                        CallLogRepository(this).add(CallLogModel(-1, "0$phone", "---------------"))
+                    }
+                    Toasty.success(
+                        this,
+                        "Đã thêm thành công, khởi động lại ứng dụng",
+                        Toasty.LENGTH_SHORT,
+                        true
+                    ).show()
+                    val intent = Intent(this, MainActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    this.startActivity(intent)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        finishAffinity()
+                    } else {
+
+                    }
+                }.show()
+        }
     }
+
 
     private fun askForStartService() {
         SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
@@ -112,7 +207,7 @@ class SettingActivity : AppCompatActivity() {
         }
 
         // Nếu giá trị nhỏ nhơn 2
-        if (inpDelayTimeInCall < 3) {
+        if (inpDelayTimeInCall < 1) {
             Toasty.error(
                 this,
                 "Thời gian tối thiểu chờ cuộc gọi là 1 giây",

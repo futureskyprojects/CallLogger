@@ -127,6 +127,7 @@
 
             <Button
                 style="@style/Button.Danger"
+                android:id="@+id/settingBtnRemoveAllCallLog"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="30dp"
@@ -135,10 +136,20 @@
 
             <Button
                 style="@style/Button.Danger"
+                android:id="@+id/settingBtnRemoveAllExportHistory"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="30dp"
                 android:text="Xóa tất cả lịch sử xuất số"
+                android:textAllCaps="true" />
+
+            <Button
+                android:id="@+id/settingBtnCreateSample"
+                style="@style/Button.Danger"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="THÊM 200 SĐT MẪU"
                 android:textAllCaps="true" />
         </LinearLayout>
 

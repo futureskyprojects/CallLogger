@@ -2,15 +2,20 @@ package vn.vistark.calllogger.views.export_history
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import cn.pedant.SweetAlert.SweetAlertDialog
+import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.activity_export_history.*
 import vn.vistark.calllogger.R
 import vn.vistark.calllogger.models.ExportHistoryModel
 import vn.vistark.calllogger.models.repositories.ExportHistoryRepository
+import java.io.File
 
 class ExportHistoryActivity : AppCompatActivity() {
     lateinit var exportHistoryRepository: ExportHistoryRepository
@@ -26,6 +31,8 @@ class ExportHistoryActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_export_history)
 
+        exportHistoryRepository = ExportHistoryRepository(this)
+
         // Thiết lập tiêu đề
         supportActionBar?.title = "Lịch sử xuất"
 
@@ -40,6 +47,68 @@ class ExportHistoryActivity : AppCompatActivity() {
         aehRvExportHistories.layoutManager = LinearLayoutManager(this)
         aehRvExportHistories.setHasFixedSize(true)
         aehRvExportHistories.adapter = adapter
+
+        // Sự kiện khi nhắn giữ
+        adapter.onLongClick = { exh ->
+            SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                .setTitleText("Vui lòng chọn thao tác")
+                .setContentText("LỰA CHỌN")
+                .setConfirmButton("Mở thư mục") {
+                    it.dismissWithAnimation()
+                    it.cancel()
+
+                    val f = File(exh.exportContent)
+
+                    if (!f.exists()) {
+                        SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
+                            .setTitleText("Tệp không còn tồn tại")
+                            .setContentText("KHÔNG CÒN")
+                            .showCancelButton(false)
+                            .setConfirmButton("Đóng") {
+                                it.dismissWithAnimation()
+                                it.cancel()
+                            }
+                            .show()
+                    } else {
+                        // Mở thư mục
+                        val intent = Intent(Intent.ACTION_GET_CONTENT)
+                        val uri = Uri.parse(f.parentFile!!.path)
+                        intent.setDataAndType(uri, "text/plain")
+                        startActivity(Intent.createChooser(intent, "Mở thư mục"))
+                        ///=====
+                    }
+                }
+                .setCancelButton("Xóa") {
+                    it.dismissWithAnimation()
+                    it.cancel()
+
+                    val f = File(exh.exportContent)
+                    var isDone = false
+
+                    if (f.exists())
+                        isDone = f.delete()
+                    else
+                        isDone = true
+
+                    if (isDone && exportHistoryRepository.remove(exh.id)) {
+                        exportHistories.remove(exh)
+                        adapter.notifyDataSetChanged()
+                        updateCount()
+                        SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
+                            .setTitleText("Xóa thành công")
+                            .setContentText("ĐÃ XÓA")
+                            .showCancelButton(false)
+                            .setConfirmButton("Đóng") {
+                                it.dismissWithAnimation()
+                                it.cancel()
+                            }.show()
+                    }
+                }
+                .setNeutralButton("Đóng") {
+                    it.dismissWithAnimation()
+                    it.cancel()
+                }.show()
+        }
 
         // Gọi sự kiện khi kéo đến gần cuối danh sách
         initLoadMoreEvents()
@@ -61,7 +130,7 @@ class ExportHistoryActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     fun updateCount() {
-        aehTvCount.text = "Danh sách xuất (${exportHistories.size})"
+        aehTvCount.text = "Danh sách xuất (${exportHistoryRepository.getCount()})"
     }
 
     // Phương thức cho chạy loading

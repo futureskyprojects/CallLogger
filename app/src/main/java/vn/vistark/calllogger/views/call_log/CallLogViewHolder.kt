@@ -8,7 +8,7 @@ import vn.vistark.calllogger.R
 import vn.vistark.calllogger.models.CallLogModel
 
 class CallLogViewHolder(val v: View) : RecyclerView.ViewHolder(v) {
-    private val clnItemLnRoot: LinearLayout = v.findViewById(R.id.clnItemLnRoot)
+    val clnItemLnRoot: LinearLayout = v.findViewById(R.id.clnItemLnRoot)
     private val clnItemTvPhoneNumber: TextView = v.findViewById(R.id.clnItemTvPhoneNumber)
     private val clnItemTvTime: TextView = v.findViewById(R.id.clnItemTvTime)
 
