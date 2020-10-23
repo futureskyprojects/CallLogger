@@ -6,12 +6,16 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_export_history.*
 import vn.vistark.calllogger.R
-import vn.vistark.calllogger.controller.export_history.ExportHistoryLoader
 import vn.vistark.calllogger.models.ExportHistoryModel
+import vn.vistark.calllogger.models.repositories.ExportHistoryRepository
 
 class ExportHistoryActivity : AppCompatActivity() {
+    lateinit var exportHistoryRepository: ExportHistoryRepository
+    var lastExportHistoryIndex = 0
+
     // Nơi chứa dữ liệu danh sách các bản đã xuất
     val exportHistories = ArrayList<ExportHistoryModel>()
 
@@ -37,12 +41,15 @@ class ExportHistoryActivity : AppCompatActivity() {
         aehRvExportHistories.setHasFixedSize(true)
         aehRvExportHistories.adapter = adapter
 
-        // Tiến hành load dữ liệu
-        ExportHistoryLoader(this)
+        // Gọi sự kiện khi kéo đến gần cuối danh sách
+        initLoadMoreEvents()
+
+        // Load 200 record đầu
+        loadMore()
     }
 
     // Phương thức cập nhật, thêm mới lịch sử cuộc gọi vào danh sách
-    fun addCampaign(exportHistory: ExportHistoryModel) {
+    fun addExportHistory(exportHistory: ExportHistoryModel) {
         exportHistories.add(exportHistory)
         runOnUiThread {
             if (aehRvExportHistories.visibility != View.VISIBLE)
@@ -66,6 +73,36 @@ class ExportHistoryActivity : AppCompatActivity() {
     fun hideLoading() {
         aehPbLoading.post {
             aehPbLoading.visibility = View.GONE
+        }
+    }
+
+    private fun initLoadMoreEvents() {
+        aehRvExportHistories.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (!recyclerView.canScrollVertically(1)) {
+                    loadMore()
+                }
+            }
+        })
+    }
+
+    private fun loadMore() {
+        showLoading()
+        val _exportHistories = exportHistoryRepository.getLimit(lastExportHistoryIndex, 100)
+
+        if (_exportHistories.isEmpty()) {
+            hideLoading()
+            return
+        }
+
+        lastExportHistoryIndex = _exportHistories[_exportHistories.size - 1].id
+        _exportHistories.forEach { cl ->
+            addExportHistory(cl)
+        }
+        runOnUiThread {
+            hideLoading()
+            adapter.notifyDataSetChanged()
         }
     }
 
