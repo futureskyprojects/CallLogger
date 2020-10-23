@@ -8,16 +8,21 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import cn.pedant.SweetAlert.SweetAlertDialog
 import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.activity_call_log.*
 import vn.vistark.calllogger.R
-import vn.vistark.calllogger.controller.call_log.CallLogLoader
 import vn.vistark.calllogger.models.CallLogModel
+import vn.vistark.calllogger.models.repositories.CallLogRepository
 import vn.vistark.calllogger.views.export_history.ExportHistoryActivity
-import vn.vistark.calllogger.views.export_history.ExportHistoryAdapter
 import vn.vistark.calllogger.views.setting.SettingActivity
 
 class CallLogActivity : AppCompatActivity() {
+    lateinit var callLogRepository: CallLogRepository
+    var lastCallLogIndex = 0
+    var numberForSearch = ""
+
     companion object {
         var leaking: CallLogActivity? = null
     }
@@ -32,6 +37,8 @@ class CallLogActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_call_log)
 
+        callLogRepository = CallLogRepository(this)
+
         // Thiết lập tiêu đề
         supportActionBar?.title = "Lịch sử gọi đến"
 
@@ -43,20 +50,61 @@ class CallLogActivity : AppCompatActivity() {
         aclRvCallLogs.setHasFixedSize(true)
         aclRvCallLogs.adapter = adapter
 
-        // Tiến hành load dữ liệu
-        CallLogLoader(this)
+        // Gọi sự kiện khi kéo đến gần cuối danh sách
+        initLoadMoreEvents()
+
+        // Load 200 record đầu
+        loadMore()
 
         leaking = this
+
+        aclBtnSearch.setOnClickListener {
+            numberForSearch = aclEdtPhoneNumber.text.toString()
+            lastCallLogIndex = 0
+            callLogs.clear()
+            updateCount()
+            loadMore()
+        }
     }
 
     // Phương thức cập nhật, thêm mới lịch sử cuộc gọi vào danh sách
-    fun addCampaign(callLog: CallLogModel) {
+    fun addCallLog(callLog: CallLogModel) {
         callLogs.add(callLog)
         runOnUiThread {
             if (aclRvCallLogs.visibility != View.VISIBLE)
                 aclRvCallLogs.visibility = View.VISIBLE
             adapter.notifyDataSetChanged()
             updateCount()
+        }
+    }
+
+    private fun initLoadMoreEvents() {
+        aclRvCallLogs.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (!recyclerView.canScrollVertically(1)) {
+                    loadMore()
+                }
+            }
+        })
+    }
+
+    private fun loadMore() {
+        showLoading()
+        val _callLogs = callLogRepository.getLimit(lastCallLogIndex, 100, numberForSearch)
+
+        if (_callLogs.isEmpty()) {
+            hideLoading()
+            return
+        }
+
+        lastCallLogIndex = _callLogs[_callLogs.size - 1].id
+        _callLogs.forEach { cl ->
+            addCallLog(cl)
+        }
+        runOnUiThread {
+            hideLoading()
+            adapter.notifyDataSetChanged()
         }
     }
 
@@ -113,6 +161,7 @@ class CallLogActivity : AppCompatActivity() {
             aclPbLoading.visibility = View.GONE
         }
     }
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

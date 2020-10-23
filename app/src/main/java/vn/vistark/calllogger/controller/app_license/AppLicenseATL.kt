@@ -2,7 +2,7 @@ package vn.vistark.calllogger.controller.app_license
 
 import androidx.loader.content.AsyncTaskLoader
 import com.google.gson.Gson
-import vn.vistark.calllogger.MainActivity
+import vn.vistark.calllogger.views.MainActivity
 import vn.vistark.calllogger.models.app_license.AppLicense
 import java.net.URL
 

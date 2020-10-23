@@ -21,7 +21,8 @@ class DatabaseContext(val context: Context) : SQLiteOpenHelper(
                     "\t\"${CallLogModel.ID}\"\tINTEGER NOT NULL,\n" +
                     "\t\"${CallLogModel.PHONE_NUMBER}\"\tTEXT NOT NULL,\n" +
                     "\t\"${CallLogModel.RECEIVED_AT}\"\tTEXT NOT NULL,\n" +
-                    "\tPRIMARY KEY(\"${CallLogModel.ID}\" AUTOINCREMENT)\n" +
+                    "\tPRIMARY KEY(\"${CallLogModel.ID}\" AUTOINCREMENT)," +
+                    "UNIQUE(${CallLogModel.PHONE_NUMBER})\n" +
                     ");"
         )
 

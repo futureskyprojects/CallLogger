@@ -19,6 +19,18 @@ class AppStorage {
                 }?.apply()
             }
 
+        // Cho phép service khởi chạy hay không
+        var EnableEndCall: Boolean
+            get() {
+                return SPUtils.sp?.getBoolean("EnableEndCall", true)
+                    ?: true
+            }
+            set(enable) {
+                SPUtils.sp?.edit()?.apply {
+                    putBoolean("EnableEndCall", enable)
+                }?.apply()
+            }
+
         // Mật khẩu mặc định để truy cập ứng dụng
         var AppPassword: String
             get() {
@@ -55,21 +67,10 @@ class AppStorage {
                 }?.apply()
             }
 
-        // Thời gian delay sau mỗi cuộc gọi, đơn vị tính bằng giây
-        var DelayTimeInSeconds: Int
-            get() {
-                return SPUtils.sp?.getInt("DelayTimeInSeconds", 10) ?: 10
-            }
-            set(value) {
-                SPUtils.sp?.edit()?.apply {
-                    putInt("DelayTimeInSeconds", value)
-                }?.apply()
-            }
-
         // Thời gian thực hiện mỗi cuộc gọi
         var DelayTimeCallInSeconds: Int
             get() {
-                return SPUtils.sp?.getInt("DelayTimeCallInSeconds", 6) ?: 6
+                return SPUtils.sp?.getInt("DelayTimeCallInSeconds", 1) ?: 1
             }
             set(value) {
                 SPUtils.sp?.edit()?.apply {

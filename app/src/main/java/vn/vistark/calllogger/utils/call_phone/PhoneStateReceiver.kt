@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.CountDownTimer
+import android.telecom.Call
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
 import es.dmoral.toasty.Toasty
@@ -19,6 +19,17 @@ import java.util.*
 
 // https://stackoverflow.com/questions/9684866/how-to-detect-when-phone-is-answered-or-rejected
 class PhoneStateReceiver : BroadcastReceiver() {
+    var WeekDays = arrayOf(
+        "",
+        "CN",
+        "T2",
+        "T3",
+        "T4",
+        "T5",
+        "T6",
+        "T7"
+    )
+
     // Khi nhận được trạng thái về cuộc gọi
     @SuppressLint("UnsafeProtectedBroadcastReceiver")
     override fun onReceive(context: Context, intent: Intent) {
@@ -28,22 +39,37 @@ class PhoneStateReceiver : BroadcastReceiver() {
             @SuppressLint("SimpleDateFormat")
             override fun onCallStateChanged(state: Int, incomingNumber: String) {
                 super.onCallStateChanged(state, incomingNumber)
-                val calendar = Calendar.getInstance()
-                val dateFormat = SimpleDateFormat("hh:mm dd/MM/yyyy")
-                val dayName = "~~"
-                // Nếu cho phép chạy dịch vụ, tiến hành ngắt cuộc gọi và lưu
-                if (AppStorage.EnableService) {
-                    killCall(context)
+
+                println("$incomingNumber >>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                println("$state")
+
+                if (state == TelephonyManager.CALL_STATE_RINGING) {
+                    val calendar = Calendar.getInstance()
+                    val dateFormat = SimpleDateFormat("hh:mm dd/MM/yyyy")
+                    val dayName = WeekDays[calendar.get(Calendar.DAY_OF_WEEK) % WeekDays.size]
+
+                    // Nếu cho phép chạy dịch vụ, tiến hành ngắt cuộc gọi và lưu
+                    if (AppStorage.EnableEndCall) {
+                        Timer().schedule(object : TimerTask() {
+                            override fun run() {
+                                killCall(context)
+                            }
+                        }, AppStorage.DelayTimeCallInSeconds * 1000L)
+                    }
+
+                    if (incomingNumber.isEmpty())
+                        return
+
                     val callLog = CallLogModel(
                         -1,
                         incomingNumber,
-                        "${dateFormat.format(calendar.time)} ()"
-                    );
-                    CallLogRepository(context).add(callLog)
+                        "${dateFormat.format(calendar.time)} ($dayName)"
+                    )
 
-                    CallLogActivity.leaking?.addCampaign(callLog)
+                    if (CallLogRepository(context).add(callLog) > 0) {
+                        CallLogActivity.leaking?.addCallLog(callLog)
+                    }
                 }
-                println("incomingNumber : $incomingNumber")
             }
         }, PhoneStateListener.LISTEN_CALL_STATE)
     }
@@ -94,11 +120,11 @@ class PhoneStateReceiver : BroadcastReceiver() {
             // Invoke endCall()
             methodEndCall.invoke(telephonyInterface)
         } catch (ex: Exception) { // Many things can go wrong with reflection calls
-            Toasty.error(
-                context,
-                "Ứng dụng không thể can thiệp vào hệ thống để ngưng cuộc gọi",
-                Toasty.LENGTH_SHORT
-            ).show()
+//            Toasty.error(
+//                context,
+//                "Ứng dụng không thể can thiệp vào hệ thống để ngưng cuộc gọi",
+//                Toasty.LENGTH_SHORT
+//            ).show()
             return false
         }
         return true

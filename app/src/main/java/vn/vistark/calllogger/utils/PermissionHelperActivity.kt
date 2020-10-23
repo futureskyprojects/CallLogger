@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.activity_permission_helper.*
-import vn.vistark.calllogger.MainActivity
+import vn.vistark.calllogger.views.MainActivity
 import vn.vistark.calllogger.R
 import vn.vistark.calllogger.component.BlockNotifier
 

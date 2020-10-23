@@ -5,7 +5,8 @@ import androidx.loader.app.LoaderManager
 import androidx.loader.content.Loader
 import vn.vistark.calllogger.views.call_log.CallLogActivity
 
-class CallLogLoader(val context: CallLogActivity) : LoaderManager.LoaderCallbacks<Boolean> {
+class CallLogLoader(val context: CallLogActivity, val phoneNumber: String) :
+    LoaderManager.LoaderCallbacks<Boolean> {
     var loaderManager: LoaderManager = LoaderManager.getInstance(context)
 
     init {
@@ -13,7 +14,7 @@ class CallLogLoader(val context: CallLogActivity) : LoaderManager.LoaderCallback
     }
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Boolean> {
-        return CallLogATL(context)
+        return CallLogATL(context, phoneNumber)
     }
 
     override fun onLoadFinished(loader: Loader<Boolean>, data: Boolean?) {

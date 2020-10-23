@@ -4,7 +4,8 @@ import androidx.loader.content.AsyncTaskLoader
 import vn.vistark.calllogger.models.repositories.CallLogRepository
 import vn.vistark.calllogger.views.call_log.CallLogActivity
 
-class CallLogATL(val context: CallLogActivity) : AsyncTaskLoader<Boolean>(context) {
+class CallLogATL(val context: CallLogActivity, val phoneNumber: String) :
+    AsyncTaskLoader<Boolean>(context) {
     private val callLogRepository = CallLogRepository(context)
 
     init {
@@ -35,7 +36,7 @@ class CallLogATL(val context: CallLogActivity) : AsyncTaskLoader<Boolean>(contex
 
             // Lặp và thêm vào ds hiển tị
             callLogs.forEach { campaign ->
-                context.addCampaign(campaign)
+                context.addCallLog(campaign)
             }
         }
 

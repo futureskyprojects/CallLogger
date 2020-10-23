@@ -1,10 +1,10 @@
-package vn.vistark.calllogger
+package vn.vistark.calllogger.views
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import vn.vistark.calllogger.R
 import vn.vistark.calllogger.component.BlockNotifier
-import vn.vistark.calllogger.controller.app_license.AppLicenseLoader
 import vn.vistark.calllogger.models.app_license.AppLicense
 import vn.vistark.calllogger.models.storages.AppStorage
 import vn.vistark.calllogger.utils.*

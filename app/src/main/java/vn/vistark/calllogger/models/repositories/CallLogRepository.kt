@@ -27,22 +27,26 @@ class CallLogRepository(val context: Context) {
 
     // Xem bên CampaignRespository
     fun add(model: CallLogModel): Long {
-        // Xây dựng bộ dữ liệu
-        val contentValues = createDataValues(model)
+        try {
+            // Xây dựng bộ dữ liệu
+            val contentValues = createDataValues(model)
 
-        // Ghi vào db
-        val res =
-            instance.writableDatabase.insert(CallLogModel.TABLE_NAME, null, contentValues)
+            // Ghi vào db
+            val res =
+                instance.writableDatabase.insert(CallLogModel.TABLE_NAME, null, contentValues)
 
-        // Đóng CSDL lại
-        instance.writableDatabase.close()
+            // Đóng CSDL lại
+            instance.writableDatabase.close()
 
-        // Trả về kết quả
-        return res
+            // Trả về kết quả
+            return res
+        } catch (_: Exception) {
+            return -1
+        }
     }
 
     // Nên coi http://sqlfiddle.com/#!5/d0a2d/2746
-    fun getLimit(lastCallLogId: Int, limit: Long): Array<CallLogModel> {
+    fun getLimit(lastCallLogId: Int, limit: Long, phoneNumber: String = ""): Array<CallLogModel> {
         // Khai báo biến chứa danh sách
         val callLogs = ArrayList<CallLogModel>()
         // Lấy con trỏ
@@ -50,8 +54,11 @@ class CallLogRepository(val context: Context) {
             true,
             CallLogModel.TABLE_NAME,
             null,
-            "${CallLogModel.ID} > ?",
-            arrayOf(lastCallLogId.toString()),
+            if (phoneNumber.isNotEmpty()) "${CallLogModel.ID} > ? AND ${CallLogModel.PHONE_NUMBER} LIKE ?" else "${CallLogModel.ID} > ?",
+            if (phoneNumber.isNotEmpty()) arrayOf(
+                lastCallLogId.toString(),
+                "$phoneNumber%"
+            ) else arrayOf(lastCallLogId.toString()),
             null,
             null,
             "${CallLogModel.ID} ASC",
