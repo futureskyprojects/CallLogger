@@ -61,7 +61,7 @@ class ExportHistoryActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     fun updateCount() {
-        aehTvCount.text = "Danh sách số gọi đến (${exportHistories.size})"
+        aehTvCount.text = "Danh sách xuất (${exportHistories.size})"
     }
 
     // Phương thức cho chạy loading

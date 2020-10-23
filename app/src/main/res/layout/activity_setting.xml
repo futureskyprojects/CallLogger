@@ -84,7 +84,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="10dp"
                         android:layout_marginRight="10dp"
-                        android:text="Tiến hành gọi trong"
+                        android:text="Tự ngắt cuộc gọi sau"
                         android:textColor="@color/colorSecondary"
                         android:textSize="14sp"
                         android:textStyle="bold" />
