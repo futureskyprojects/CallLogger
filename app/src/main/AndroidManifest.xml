@@ -29,15 +29,17 @@
         <service
             android:name=".services.BackgroundService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
 
         <activity android:name=".views.export_history.ExportHistoryActivity" />
         <activity android:name=".views.call_log.CallLogActivity" />
         <activity android:name=".views.setting.SettingActivity" />
 
         <receiver android:name=".utils.call_phone.PhoneStateReceiver">
-            <intent-filter android:priority="0">
+            <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE" />
+            </intent-filter>
+            <intent-filter>
                 <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
             </intent-filter>
         </receiver>

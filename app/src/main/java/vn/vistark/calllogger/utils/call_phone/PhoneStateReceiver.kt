@@ -1,13 +1,10 @@
 package vn.vistark.calllogger.utils.call_phone
 
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.telecom.Call
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
-import es.dmoral.toasty.Toasty
 import vn.vistark.calllogger.models.CallLogModel
 import vn.vistark.calllogger.models.repositories.CallLogRepository
 import vn.vistark.calllogger.models.storages.AppStorage
@@ -18,7 +15,7 @@ import java.util.*
 
 
 // https://stackoverflow.com/questions/9684866/how-to-detect-when-phone-is-answered-or-rejected
-class PhoneStateReceiver : BroadcastReceiver() {
+class PhoneStateReceiver : PhonecallReceiver() {
     var WeekDays = arrayOf(
         "",
         "CN",
@@ -30,48 +27,86 @@ class PhoneStateReceiver : BroadcastReceiver() {
         "T7"
     )
 
-    // Khi nhận được trạng thái về cuộc gọi
-    @SuppressLint("UnsafeProtectedBroadcastReceiver")
-    override fun onReceive(context: Context, intent: Intent) {
-        val telephony =
-            context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-        telephony.listen(object : PhoneStateListener() {
-            @SuppressLint("SimpleDateFormat")
-            override fun onCallStateChanged(state: Int, incomingNumber: String) {
-                super.onCallStateChanged(state, incomingNumber)
+    override fun onIncomingCallReceived(
+        context: Context?,
+        incomingNumber: String?,
+        start: Date?
+    ) {
 
-                println("$incomingNumber >>>>>>>>>>>>>>>>>>>>>>>>>>>")
-                println("$state")
+        println("Nhận cuộc gọi đến từ số $incomingNumber")
+        val calendar = Calendar.getInstance()
+        val dateFormat = SimpleDateFormat("hh:mm dd/MM/yyyy")
+        val dayName = WeekDays[calendar.get(Calendar.DAY_OF_WEEK) % WeekDays.size]
 
-                if (state == TelephonyManager.CALL_STATE_RINGING) {
-                    val calendar = Calendar.getInstance()
-                    val dateFormat = SimpleDateFormat("hh:mm dd/MM/yyyy")
-                    val dayName = WeekDays[calendar.get(Calendar.DAY_OF_WEEK) % WeekDays.size]
-
-                    // Nếu cho phép chạy dịch vụ, tiến hành ngắt cuộc gọi và lưu
-                    if (AppStorage.EnableEndCall) {
-                        Timer().schedule(object : TimerTask() {
-                            override fun run() {
-                                killCall(context)
-                            }
-                        }, AppStorage.DelayTimeCallInSeconds * 1000L)
-                    }
-
-                    if (incomingNumber.isEmpty())
-                        return
-
-                    val callLog = CallLogModel(
-                        -1,
-                        incomingNumber,
-                        "${dateFormat.format(calendar.time)} ($dayName)"
-                    )
-
-                    if (CallLogRepository(context).add(callLog) > 0) {
-                        CallLogActivity.leaking?.addCallLog(callLog)
-                    }
+        // Nếu cho phép chạy dịch vụ, tiến hành ngắt cuộc gọi và lưu
+        println("Chế độ ngắt cuộc gọi: ${AppStorage.EnableEndCall}")
+        if (AppStorage.EnableEndCall) {
+            println("Ngắt cuộc gọi sau: ${AppStorage.DelayTimeCallInSeconds} giây")
+            Timer().schedule(object : TimerTask() {
+                override fun run() {
+                    killCall(context!!)
                 }
-            }
-        }, PhoneStateListener.LISTEN_CALL_STATE)
+            }, AppStorage.DelayTimeCallInSeconds * 1000L)
+        }
+
+        if (incomingNumber.isNullOrEmpty())
+            return
+
+        val callLog = CallLogModel(
+            -1,
+            incomingNumber,
+            "${dateFormat.format(calendar.time)} ($dayName)"
+        )
+
+        print("Lưu số điện thoại $incomingNumber ")
+        if (CallLogRepository(context!!).add(callLog) > 0) {
+            CallLogActivity.leaking?.addCallLog(callLog)
+            println("[Thành công]")
+        } else {
+            println("[Không thành công]")
+        }
+    }
+
+    override fun onIncomingCallAnswered(
+        ctx: Context?,
+        number: String?,
+        start: Date?
+    ) {
+        //
+    }
+
+    override fun onIncomingCallEnded(
+        ctx: Context?,
+        number: String?,
+        start: Date?,
+        end: Date?
+    ) {
+        //
+    }
+
+    override fun onOutgoingCallStarted(
+        ctx: Context?,
+        number: String?,
+        start: Date?
+    ) {
+        //
+    }
+
+    override fun onOutgoingCallEnded(
+        ctx: Context?,
+        number: String?,
+        start: Date?,
+        end: Date?
+    ) {
+        //
+    }
+
+    override fun onMissedCall(
+        ctx: Context?,
+        number: String?,
+        start: Date?
+    ) {
+        //
     }
 
 //    private fun KillCallTimer(context: Context) {
@@ -125,6 +160,7 @@ class PhoneStateReceiver : BroadcastReceiver() {
 //                "Ứng dụng không thể can thiệp vào hệ thống để ngưng cuộc gọi",
 //                Toasty.LENGTH_SHORT
 //            ).show()
+            println("Ứng dụng không thể can thiệp vào hệ thống để ngưng cuộc gọi")
             return false
         }
         return true

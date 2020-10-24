@@ -1,32 +1,47 @@
 package vn.vistark.calllogger.utils.call_phone
 
+import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
 import java.util.*
 
 abstract class PhonecallReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
 
-        //We listen to two intents.  The new outgoing call only tells us of an outgoing call.  We use it to get the number.
-        if (intent.action == "android.intent.action.NEW_OUTGOING_CALL") {
-            savedNumber =
-                intent.extras!!.getString("android.intent.extra.PHONE_NUMBER")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val telephony =
+                context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+            telephony.listen(object : PhoneStateListener() {
+                override fun onCallStateChanged(state: Int, incomingNumber: String) {
+                    super.onCallStateChanged(state, incomingNumber)
+                    onCallStateChanged(context, state, incomingNumber)
+                }
+            }, PhoneStateListener.LISTEN_CALL_STATE)
         } else {
-            val stateStr =
-                intent.extras!!.getString(TelephonyManager.EXTRA_STATE)
-            val number =
-                intent.extras!!.getString(TelephonyManager.EXTRA_INCOMING_NUMBER)
-            var state = 0
-            if (stateStr == TelephonyManager.EXTRA_STATE_IDLE) {
-                state = TelephonyManager.CALL_STATE_IDLE
-            } else if (stateStr == TelephonyManager.EXTRA_STATE_OFFHOOK) {
-                state = TelephonyManager.CALL_STATE_OFFHOOK
-            } else if (stateStr == TelephonyManager.EXTRA_STATE_RINGING) {
-                state = TelephonyManager.CALL_STATE_RINGING
+            //We listen to two intents.  The new outgoing call only tells us of an outgoing call.  We use it to get the number.
+            if (intent.action == "android.intent.action.NEW_OUTGOING_CALL") {
+                savedNumber =
+                    intent.extras!!.getString("android.intent.extra.PHONE_NUMBER")
+            } else {
+                val stateStr =
+                    intent.extras!!.getString(TelephonyManager.EXTRA_STATE)
+                val number =
+                    intent.extras!!.getString(TelephonyManager.EXTRA_INCOMING_NUMBER)
+                var state = 0
+                if (stateStr == TelephonyManager.EXTRA_STATE_IDLE) {
+                    state = TelephonyManager.CALL_STATE_IDLE
+                } else if (stateStr == TelephonyManager.EXTRA_STATE_OFFHOOK) {
+                    state = TelephonyManager.CALL_STATE_OFFHOOK
+                } else if (stateStr == TelephonyManager.EXTRA_STATE_RINGING) {
+                    state = TelephonyManager.CALL_STATE_RINGING
+                }
+
+                onCallStateChanged(context, state, number)
             }
-            onCallStateChanged(context, state, number)
         }
     }
 
